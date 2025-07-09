@@ -1,0 +1,64 @@
+log:
+  level: debug
+  
+http:
+  address: 0.0.0.0
+  port: 5000
+  publicURL: http://localhost:5000
+
+spi:
+  address: 0.0.0.0
+  port: 5101
+  publicURL: http://localhost:5101
+  enabled: true
+
+metrics:
+  enabled: true
+  port: 6000
+  address: 127.0.0.1
+
+multiparty:
+  enabled: true
+  org:
+    name: TestOrg
+  node:
+    name: TestNode
+  contract:
+    location:
+      address: "0x0000000000000000000000000000000000000000"
+      blockNumber: 0
+  plugins:
+    - blockchain0
+    - database0
+    - sharedstorage0
+    - dataexchange0
+
+plugins:
+  blockchain:
+    - name: blockchain0
+      type: cardano
+      cardano:
+        cardanoconnect:
+          url: http://firefly-cardanoconnect:5018
+          topic: "0"
+
+  database:
+    - name: database0
+      type: postgres
+      postgres:
+        url: postgres://postgres:f1refly@postgres:5432?sslmode=disable
+
+  sharedstorage:
+    - name: sharedstorage0
+      type: ipfs
+      ipfs:
+        api:
+          url: http://ipfs_0:5001
+        gateway:
+          url: http://ipfs_0:8080
+
+  dataexchange:
+    - name: dataexchange0
+      type: ffdx
+      ffdx:
+        url: http://dataexchange_0:3000
