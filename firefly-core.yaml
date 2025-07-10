@@ -1,6 +1,6 @@
 log:
   level: debug
-  
+
 http:
   address: 0.0.0.0
   port: 5000
@@ -12,24 +12,29 @@ spi:
   publicURL: http://localhost:5101
   enabled: true
 
-metrics:
-  enabled: true
-  port: 6000
-  address: 127.0.0.1
+metrics: {}
 
-multiparty:
-  enabled: true
-  org:
-    name: TestOrg
-  node:
-    name: TestNode
-  contract:
-    location:
-      address: "0x0000000000000000000000000000000000000000"
-      blockNumber: 0
-  plugins:
-    - blockchain0
+namespaces:
+  default: default
+  predefined:
+  - defaultKey: 0x08876b3097fd7da321e513e5ceafaabfb9c5050a
+    description: Default predefined namespace
+    multiparty:
+      contract:
+      - firstEvent: "tip"
+        location:
+          address: 0xbf3e9969e15ee80a7568b812cd2191f7e4ca6fa1
+        options: {}
+      enabled: true
+      node:
+        name: node_3a0550
+      org:
+        key: 0x08876b3097fd7da321e513e5ceafaabfb9c5050a
+        name: org_3a0550
+    name: default
+    plugins:
     - database0
+    - blockchain0
     - sharedstorage0
     - dataexchange0
 
@@ -44,9 +49,11 @@ plugins:
 
   database:
     - name: database0
-      type: postgres
-      postgres:
-        url: postgres://postgres:f1refly@postgres:5432?sslmode=disable
+      type: sqlite3
+      sqlite3:
+        url: /etc/firefly/data/db/sqlite.db?_busy_timeout=5000
+        migrations:
+          auto: true
 
   sharedstorage:
     - name: sharedstorage0
