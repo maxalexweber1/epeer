@@ -17,20 +17,8 @@ metrics: {}
 namespaces:
   default: default
   predefined:
-  - defaultKey: 0x08876b3097fd7da321e513e5ceafaabfb9c5050a
+  - defaultKey: addr_test1vqhkukz0285zvk0xrwk9jlq0075tx6furuzcjvzpnhtgelsuhhqc4
     description: Default predefined namespace
-    multiparty:
-      contract:
-      - firstEvent: "tip"
-        location:
-          address: 0xbf3e9969e15ee80a7568b812cd2191f7e4ca6fa1
-        options: {}
-      enabled: true
-      node:
-        name: node_3a0550
-      org:
-        key: 0x08876b3097fd7da321e513e5ceafaabfb9c5050a
-        name: org_3a0550
     name: default
     plugins:
     - database0
@@ -69,3 +57,10 @@ plugins:
       type: ffdx
       ffdx:
         url: http://dataexchange_0:3000
+  
+  tokens:
+  - name: token0
+    plugin: cardano
+    cardano:
+      connector: http://firefly-cardanoconnect:5018
+      topic: "0"
