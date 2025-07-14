@@ -1,0 +1,68 @@
+log:
+  level: debug
+
+http:
+  address: 0.0.0.0
+  port: 5001
+  publicURL: http://localhost:5001
+
+spi:
+  address: 0.0.0.0
+  port: 5101
+  publicURL: http://localhost:5101
+  enabled: true
+
+metrics: {}
+
+namespaces:
+  default: default1
+  predefined:
+  - defaultKey: addr_test1vqhkukz0285zvk0xrwk9jlq0075tx6furuzcjvzpnhtgelsuhhqc4
+    description: Default predefined namespace
+    name: default1
+    plugins:
+    - database_01
+    - blockchain_01
+    - sharedstorage_01
+    - dataexchange_01
+
+identity:
+  default:
+    key: identity_01
+    did: did:firefly:node1
+
+node:
+  name: firefly-node-01
+
+plugins:
+  blockchain:
+    - name: blockchain_01
+      type: cardano
+      cardano:
+        cardanoconnect:
+          url: http://cardanoconnect_01:5048
+          topic: "0"
+
+  database:
+    - name: database_01
+      type: sqlite3
+      sqlite3:
+        url: /etc/firefly/data/db/sqlite.db?_busy_timeout=5000
+        migrations:
+          auto: true
+
+  sharedstorage:
+    - name: sharedstorage_01
+      type: ipfs
+      ipfs:
+        api:
+          url: http://ipfs_01:5001
+        gateway:
+          url: http://ipfs_01:8080
+
+  dataexchange:
+    - name: dataexchange_01
+      type: ffdx
+      ffdx:
+        url: http://dataexchange_01:3000
+  

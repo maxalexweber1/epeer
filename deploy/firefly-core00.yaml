@@ -1,0 +1,60 @@
+log:
+  level: debug
+
+http:
+  address: 0.0.0.0
+  port: 5000
+  publicURL: http://localhost:5000
+
+spi:
+  address: 0.0.0.0
+  port: 5101
+  publicURL: http://localhost:5101
+  enabled: true
+
+metrics: {}
+
+namespaces:
+  predefined:
+    - name: default
+      description: default 
+      defaultKey: addr_test1vz9zvq6kjs8mslam7ugrla0daqecyenvmhy8h4ekakargugy75294
+      multiparty:
+        enabled: false
+      plugins:
+        - database_00
+        - blockchain_00
+        - sharedstorage_00
+        - dataexchange_00
+
+plugins:
+  blockchain:
+    - name: blockchain_00
+      type: cardano
+      cardano:
+        cardanoconnect:
+          url: http://cardanoconnect_00:5018
+          topic: "0"
+
+  database:
+  - name: database_00
+    postgres:
+      migrations:
+        auto: true
+      url: postgres://postgres:f1refly@postgres:5432?sslmode=disable
+    type: postgres
+
+  sharedstorage:
+    - name: sharedstorage_00
+      type: ipfs
+      ipfs:
+        api:
+          url: http://ipfs_00:5001
+        gateway:
+          url: http://ipfs_00:8080
+
+  dataexchange:
+    - name: dataexchange_00
+      type: ffdx
+      ffdx:
+        url: http://dataexchange_00:3000

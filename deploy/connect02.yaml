@@ -1,0 +1,8 @@
+api:
+  port: 5038
+  info:
+    title: Firefly Cardano Connector
+connector:
+  signerUrl: "http://127.0.0.1:8755"
+  blockchain:
+    era: 6 

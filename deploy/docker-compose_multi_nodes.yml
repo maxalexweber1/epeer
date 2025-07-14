@@ -1,0 +1,303 @@
+services:
+# core instances
+  firefly_core_00:
+    image: ghcr.io/hyperledger/firefly:v1.4.0-rc.1
+    container_name: firefly_core_00
+    command: 
+      --config /etc/firefly/firefly-core.yaml
+    volumes:
+       - ./firefly-core00.yaml:/etc/firefly/firefly-core.yaml:ro
+       - ./firefly-data00:/etc/firefly/data
+    ports:
+      - "5000:5000"
+      - "5101:5101"
+    depends_on:
+      cardanoconnect_00:
+          condition: service_started
+      cardanosigner_00:
+          condition: service_started
+      dataexchange_00:
+          condition: service_started
+
+  firefly_core_01:
+    image: ghcr.io/hyperledger/firefly:v1.4.0-rc.1
+    container_name: firefly_core_01
+    command: 
+      --config /etc/firefly/firefly-core.yaml
+    volumes:
+       - ./firefly-core01.yaml:/etc/firefly/firefly-core.yaml:ro
+       - firefly_core_data_1:/etc/firefly/data
+    ports:
+      - "5001:5001"
+      - "6201:6201"
+    depends_on:
+      - cardanoconnect_01
+      - cardanosigner_01
+      - dataexchange_01
+          
+
+  firefly_core_02:
+    image: ghcr.io/hyperledger/firefly:v1.4.0-rc.1
+    container_name: firefly_core_02
+    command: 
+      --config /etc/firefly/firefly-core.yaml
+    volumes:
+       - ./firefly-core02.yaml:/etc/firefly/firefly-core.yaml:ro
+       - firefly_core_data_2:/etc/firefly/data
+    ports:
+      - "5002:5002"
+      - "6301:6301"
+    depends_on:
+      - cardanoconnect_02
+      - cardanosigner_02
+      - dataexchange_02
+          
+
+ # cardano connector
+  cardanoconnect_00:
+    image: ghcr.io/hyperledger/firefly-cardanoconnect:latest
+    container_name: cardanoconnect_00
+    command:
+      - "/app/firefly-cardanoconnect"
+      - "--config-file"
+      - "/app/config.yaml"
+    environment:
+      FIREFLY_URL:                                "http://firefly_core_00:5000"
+      FIREFLY_CONNECTOR_BLOCKCHAIN_BLOCKFROST_KEY: "previewAe2uMQNis3wntrX0BQtZ5G5i9jyFPsIu"
+    ports:
+      - "5018:5018"
+    volumes:
+      - ./connect00.yaml:/app/config.yaml
+
+  cardanoconnect_01:
+    image: ghcr.io/hyperledger/firefly-cardanoconnect:latest
+    container_name: cardanoconnect_01
+    command:
+      - "/app/firefly-cardanoconnect"
+      - "--config-file"
+      - "/app/config.yaml"
+    environment:
+      FIREFLY_URL:                                "http://firefly_core_01:5001"
+      FIREFLY_CONNECTOR_BLOCKCHAIN_BLOCKFROST_KEY: "previewAe2uMQNis3wntrX0BQtZ5G5i9jyFPsIu"
+    ports:
+      - "5048:5048"
+    volumes:
+      - ./connect01.yaml:/app/config.yaml
+
+  cardanoconnect_02:
+    image: ghcr.io/hyperledger/firefly-cardanoconnect:latest
+    container_name: cardanoconnect_02
+    command:
+      - "/app/firefly-cardanoconnect"
+      - "--config-file"
+      - "/app/config.yaml"
+    environment:
+      FIREFLY_URL:                                "http://firefly_core_02:5002"
+      FIREFLY_CONNECTOR_BLOCKCHAIN_BLOCKFROST_KEY: "previewAe2uMQNis3wntrX0BQtZ5G5i9jyFPsIu"
+    ports:
+      - "5038:5038"
+    volumes:
+      - ./connect02.yaml:/app/config.yaml
+
+# backend
+  backend:
+    build: ./backend
+    container_name: energy-backend
+    ports:
+      - "4000:4000"
+    environment:
+      FIREFLY_URL: "http://firefly:5000"
+    depends_on:
+      - firefly_core_01
+
+# frontend
+  frontend:
+    build: ./frontend
+    container_name: energy-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+  
+  cardanosigner_00:
+    image: ghcr.io/hyperledger/firefly-cardanosigner:main
+    container_name: cardanosigner_00
+    command:
+      - "/app/firefly-cardanosigner"
+      - "--config-file"
+      - "/app/config.yaml"
+    ports:
+      - "8555:8555"
+    volumes:
+    - ./signer00.yaml:/app/config.yaml:ro
+    - ./wallet_00:/wallet
+    depends_on:
+      - cardanoconnect_00
+        
+
+  cardanosigner_01:
+    image: ghcr.io/hyperledger/firefly-cardanosigner:main
+    container_name: cardanosigner_01
+    command:
+      - "/app/firefly-cardanosigner"
+      - "--config-file"
+      - "/app/config.yaml"
+    ports:
+      - "8655:8655"
+    volumes:
+    - ./signer01.yaml:/app/config.yaml:ro
+    - ./wallet_01:/wallet
+    depends_on:
+      - cardanoconnect_01
+
+  cardanosigner_02:
+    image: ghcr.io/hyperledger/firefly-cardanosigner:main
+    container_name: cardanosigner_02
+    command:
+      - "/app/firefly-cardanosigner"
+      - "--config-file"
+      - "/app/config.yaml"
+    ports:
+      - "8755:8755"
+    volumes:
+    - ./signer02.yaml:/app/config.yaml:ro
+    - ./wallet_02:/wallet
+    depends_on:
+      - cardanoconnect_02
+
+  ipfs_00:
+        container_name: ipfs_00
+        image: ipfs/go-ipfs:v0.10.0
+        environment:
+            IPFS_SWARM_KEY: |-
+                /key/swarm/psk/1.0.0/
+                /base16/
+                f2092cb9220c090fa4110ef040c74afb732a9b38ef2a4a5b1722c98ce4ec2483
+            LIBP2P_FORCE_PNET: "1"
+        volumes:
+            - ipfs_staging_00:/export
+            - ipfs_data_00:/data/ipfs
+        ports:
+            - 10206:5001
+            - 10207:8080
+        healthcheck:
+            test:
+                - CMD-SHELL
+                - wget --post-data= http://127.0.0.1:5001/api/v0/id -O - -q
+            interval: 5s
+            timeout: 3s
+            retries: 12
+        logging:
+            driver: json-file
+            options:
+                max-file: "1"
+                max-size: 10m
+
+  ipfs_01:
+        container_name: ipfs_01
+        image: ipfs/go-ipfs:v0.10.0
+        environment:
+            IPFS_SWARM_KEY: |-
+                /key/swarm/psk/1.0.0/
+                /base16/
+                f2092cb9220c090fa4110ef040c74afb732a9b38ef2a4a5b1722c98ce4ec2483
+            LIBP2P_FORCE_PNET: "1"
+        volumes:
+            - ipfs_staging_01:/export
+            - ipfs_data_01:/data/ipfs
+        ports:
+            - 10406:5001
+            - 10407:8080
+        healthcheck:
+            test:
+                - CMD-SHELL
+                - wget --post-data= http://127.0.0.1:5001/api/v0/id -O - -q
+            interval: 5s
+            timeout: 3s
+            retries: 12
+        logging:
+            driver: json-file
+            options:
+                max-file: "1"
+                max-size: 10m
+
+  ipfs_02:
+        container_name: ipfs_02
+        image: ipfs/go-ipfs:v0.10.0
+        environment:
+            IPFS_SWARM_KEY: |-
+                /key/swarm/psk/1.0.0/
+                /base16/
+                f2092cb9220c090fa4110ef040c74afb732a9b38ef2a4a5b1722c98ce4ec2483
+            LIBP2P_FORCE_PNET: "1"
+        volumes:
+            - ipfs_staging_02:/export
+            - ipfs_data_02:/data/ipfs
+        ports:
+            - 10606:5001
+            - 10607:8080
+        healthcheck:
+            test:
+                - CMD-SHELL
+                - wget --post-data= http://127.0.0.1:5001/api/v0/id -O - -q
+            interval: 5s
+            timeout: 3s
+            retries: 12
+        logging:
+            driver: json-file
+            options:
+                max-file: "1"
+                max-size: 10m
+
+  dataexchange_00:
+    container_name: dataexchange_00
+    image: ghcr.io/hyperledger/firefly-dataexchange-https@sha256:1e01b0d5fc3cfd95de150d47c09ba419b8ec98345d105a6d67d7bc7101aeea89
+    volumes:
+      - ./dataexchange_00:/data:ro
+    ports:
+      - 10205:3000
+    logging:
+      driver: json-file
+      options:
+        max-file: "1"
+        max-size: 10m
+
+  dataexchange_01:
+    container_name: dataexchange_01
+    image: ghcr.io/hyperledger/firefly-dataexchange-https@sha256:1e01b0d5fc3cfd95de150d47c09ba419b8ec98345d105a6d67d7bc7101aeea89
+    volumes:
+      - ./dataexchange_01:/data:ro
+    ports:
+      - 10405:3000
+    logging:
+      driver: json-file
+      options:
+        max-file: "1"
+        max-size: 10m
+
+  dataexchange_02:
+    container_name: dataexchange_02
+    image: ghcr.io/hyperledger/firefly-dataexchange-https@sha256:1e01b0d5fc3cfd95de150d47c09ba419b8ec98345d105a6d67d7bc7101aeea89
+    volumes:
+      - ./dataexchange_02:/data:ro
+    ports:
+      - 10605:3000
+    logging:
+      driver: json-file
+      options:
+        max-file: "1"
+        max-size: 10m
+
+volumes:
+  ipfs_data_00: {}
+  ipfs_staging_00: {}
+  dataexchange_00: {}
+  ipfs_data_01: {}
+  ipfs_staging_01: {}
+  dataexchange_01: {}
+  ipfs_data_02: {}
+  ipfs_staging_02: {}
+  dataexchange_02: {}
+  firefly_core_data_0: {}
+  firefly_core_data_1: {}
+  firefly_core_data_2: {}

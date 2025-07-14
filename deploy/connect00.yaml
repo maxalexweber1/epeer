@@ -1,0 +1,16 @@
+api:
+  port: 5018
+  info:
+    title: Firefly Cardano Connector
+logging:
+  level: debug
+connector:
+  signerUrl: "http://cardanosigner_00:8555"
+  blockchain:
+    network: preview
+contracts:
+  componentsPath: /contracts/components
+  storesPath: /contracts/stores
+persistence:
+  type: sqlite
+  path: /db/db.sqlite3

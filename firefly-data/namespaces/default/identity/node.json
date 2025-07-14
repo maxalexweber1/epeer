@@ -1,9 +1,0 @@
-{
-    "name": "node1",
-    "id": "did:firefly:node1",
-    "did": "did:firefly:node1",
-    "type": "node",
-    "profile": {
-        "description": "Local dev node"
-    }
-}
