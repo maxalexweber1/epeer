@@ -1,0 +1,10 @@
+curl -X POST http://localhost:5000/api/v1/namespaces/default/apis/simple-tx-0.1.0/invoke/send_ada \
+  -H "Content-Type: application/json" \
+  -d '{
+    "input": {
+      "fromAddress": "addr_test1vz9zvq6kjs8mslam7ugrla0daqecyenvmhy8h4ekakargugy75294",
+      "toAddress": "addr_test1vq6drteps2atsyyars65363r9navemqzdj8p2jw9pf29lrqgym9dw",
+      "amount": 1000000
+    },
+    "key": "addr_test1vz9zvq6kjs8mslam7ugrla0daqecyenvmhy8h4ekakargugy75294"
+  }'

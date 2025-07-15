@@ -1,7 +1,7 @@
 services:
 # core instances
   firefly_core_00:
-    image: ghcr.io/hyperledger/firefly:v1.4.0-rc.1
+    image: ghcr.io/hyperledger/firefly:v1.4.0-rc.2
     container_name: firefly_core_00
     command: 
       --config /etc/firefly/firefly-core.yaml
@@ -22,21 +22,14 @@ services:
     
  # cardano connector
   cardanoconnect_00:
-    image: ghcr.io/hyperledger/firefly-cardanoconnect:0.5.0-20250711-18
+    image: ghcr.io/hyperledger/firefly-cardanoconnect:v0.6.1
     container_name: cardanoconnect_00
-    build:
-      context: ..
-      target: firefly-cardanoconnect
-    develop:
-      watch:
-      - action: rebuild
-        path: ../firefly-cardanoconnect
     command:
       - "/app/firefly-cardanoconnect"
       - "--config-file"
       - "/app/config.yaml"
     environment:
-      FIREFLY_URL:                                "http://firefly_core_00:5000"
+      FIREFLY_URL:                                 "http://firefly_core_00:5000"
       FIREFLY_CONNECTOR_BLOCKCHAIN_BLOCKFROST_KEY: "previewAe2uMQNis3wntrX0BQtZ5G5i9jyFPsIu"
     ports:
       - 5018:5018
@@ -46,7 +39,7 @@ services:
       - connect-db:/db
 
   cardanosigner_00:
-    image: ghcr.io/hyperledger/firefly-cardanosigner:main
+    image: ghcr.io/hyperledger/firefly-cardanosigner:v0.6.1
     container_name: cardanosigner_00
     command:
       - "/app/firefly-cardanosigner"

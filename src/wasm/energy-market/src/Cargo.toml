@@ -1,0 +1,14 @@
+[package]
+name = "energy-market"
+version = "0.1.0"
+edition = "2024"
+repository = "https://github.com/maxalexweber1/epeer"
+
+[dependencies]
+firefly-balius = { path = "../../firefly-balius" }
+hex = "0.4"
+pallas-addresses = "1.0.0-alpha.2"
+serde = { version = "1", features = ["derive"] }
+
+[lib]
+crate-type = ["cdylib"]

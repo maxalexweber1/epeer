@@ -1,0 +1,284 @@
+{
+    "name": "epeer-energy-market",
+    "description": "Cardano Smart Contract for locking and trading kWhToken with ADA price condition",
+    "networkName": "epeer",
+    "version": "0.1.0",
+    "errors": [
+        {
+            "name": "InsufficientEnergy",
+            "description": "Not enough kWhToken available in the UTxO"
+        },
+        {
+            "name": "InvalidPrice",
+            "description": "Provided ADA amount does not match the price condition"
+        },
+        {
+            "name": "UnauthorizedBurn",
+            "description": "Only the token owner can burn kWhToken"
+        }
+    ],
+    "methods": [
+        {
+            "description": "Mints kWhToken based on produced energy and links to IPFS proof",
+            "details": {},
+            "name": "mint_kwh_token",
+            "params": [
+                {
+                    "name": "producerAddress",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "kWhAmount",
+                    "schema": {
+                        "type": "integer"
+                    }
+                },
+                {
+                    "name": "ipfsHash",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "returns": [
+                {
+                    "name": "tokenId",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ]
+        },
+        {
+            "description": "Locks kWhToken in a UTxO with a price condition",
+            "details": {},
+            "name": "lock_kwh_token",
+            "params": [
+                {
+                    "name": "sellerAddress",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "kWhAmount",
+                    "schema": {
+                        "type": "integer"
+                    }
+                },
+                {
+                    "name": "pricePerkWh",
+                    "schema": {
+                        "type": "integer"
+                    }
+                }
+            ],
+            "returns": [
+                {
+                    "name": "utxoId",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ]
+        },
+        {
+            "description": "Purchases kWhToken by paying the required ADA and claims the UTxO",
+            "details": {},
+            "name": "purchase_kwh_token",
+            "params": [
+                {
+                    "name": "buyerAddress",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "utxoId",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "adaAmount",
+                    "schema": {
+                        "type": "integer"
+                    }
+                }
+            ],
+            "returns": []
+        },
+        {
+            "description": "Burns kWhToken to unlock energy",
+            "details": {},
+            "name": "burn_kwh_token",
+            "params": [
+                {
+                    "name": "ownerAddress",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "kWhAmount",
+                    "schema": {
+                        "type": "integer"
+                    }
+                }
+            ],
+            "returns": []
+        },
+        {
+            "description": "Queries the current state of the contract, including locked UTxOs and available tokens",
+            "details": {},
+            "name": "query_contract_state",
+            "params": [],
+            "returns": [
+                {
+                    "name": "lockedUTxOs",
+                    "schema": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "utxoId": {
+                                    "type": "string"
+                                },
+                                "sellerAddress": {
+                                    "type": "string"
+                                },
+                                "kWhAmount": {
+                                    "type": "integer"
+                                },
+                                "pricePerkWh": {
+                                    "type": "integer"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "availablekWhTokens",
+                    "schema": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "integer"
+                        }
+                    }
+                }
+            ]
+        }
+    ],
+    "events": [
+        {
+            "name": "EnergyMinted",
+            "description": "Emitted when kWhToken is minted",
+            "params": [
+                {
+                    "name": "tokenId",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "producerAddress",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "kWhAmount",
+                    "schema": {
+                        "type": "integer"
+                    }
+                },
+                {
+                    "name": "ipfsHash",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "EnergyLocked",
+            "description": "Emitted when kWhToken is locked in a UTxO",
+            "params": [
+                {
+                    "name": "utxoId",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "sellerAddress",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "kWhAmount",
+                    "schema": {
+                        "type": "integer"
+                    }
+                },
+                {
+                    "name": "pricePerkWh",
+                    "schema": {
+                        "type": "integer"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "EnergyPurchased",
+            "description": "Emitted when kWhToken is purchased and UTxO is claimed",
+            "params": [
+                {
+                    "name": "utxoId",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "buyerAddress",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "kWhAmount",
+                    "schema": {
+                        "type": "integer"
+                    }
+                },
+                {
+                    "name": "adaAmount",
+                    "schema": {
+                        "type": "integer"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "EnergyUnlocked",
+            "description": "Emitted when kWhToken is burned to unlock energy",
+            "params": [
+                {
+                    "name": "ownerAddress",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "kWhAmount",
+                    "schema": {
+                        "type": "integer"
+                    }
+                }
+            ]
+        }
+    ]
+}
