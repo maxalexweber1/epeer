@@ -1,32 +1,33 @@
-use aiken/collection/list
-use cardano/address.{Address, Script}
 use cardano/assets.{PolicyId, quantity_of}
-use cardano/transaction.{
-  InlineDatum, Input, Output, OutputReference, Transaction,
-}
-use pool/func.{calculate_lp_mint,
-  calculate_withdraw, check_init_datum, mint_qty}
-use pool/types.{Burn, InitPool, Mint, PoolAction, PoolDatum}
+use cardano/transaction.{Transaction}
+use etrade/types.{EBurn, EMint, EMintAction}
 
-// enegery trade validator
-validator tradecontract {
+// energy trade validator
+validator mintcontract {
   // minting and burning of energy token
-  mint(redeemer action: EnergyAction, policy_id: PolicyId, tx: Transaction) {
+  mint(redeemer action: EMintAction, policy_id: PolicyId, tx: Transaction) {
     // get transaction inputs and mint or burn quantitys 
-    let Transaction { mint, inputs, outputs, .. } = tx
+    let Transaction { mint, .. } = tx
     let token_minted = quantity_of(mint, policy_id, "EPEER 1KWH")
 
     // action case
     when action is {
       // mint tradeable energy tokens
-      Mint(_, lp_tokens_minted) -> and {
-          lp_minted == lp_tokens_minted,
-          lp_tokens_minted > 0,
+      EMint { kwh_amount, ipfs_hash } -> and {
+          token_minted > 0,
+          token_minted == kwh_amount * 10,
+          // signer = producer address ?!
+          // ifps hash not null (more verification ?!)
+          // TODO check if datum in output ta is correct
+          ipfs_hash != "",
         }
-      // burn tokens // consume energy
-      Burn(_, lp_tokens_burned) -> and {
-          lp_minted == -lp_tokens_burned,
-          lp_tokens_burned > 0,
+      // burn tokens //
+      EBurn { kwh_amount, ipfs_hash } -> and {
+          // needs to be negative
+          token_minted < 0,
+          // needs to be the right amount
+          token_minted * -1 == kwh_amount * 10,
+          ipfs_hash != "",
         }
     }
   }

@@ -1,43 +1,66 @@
 use aiken/collection/list
-use cardano/address.{Address, Script}
-use cardano/assets.{PolicyId, quantity_of}
+use cardano/address.{Address, VerificationKey}
+use cardano/assets
 use cardano/transaction.{
   InlineDatum, Input, Output, OutputReference, Transaction,
 }
-use pool/func.{calculate_lp_mint,
-  calculate_withdraw, check_init_datum, mint_qty}
-use pool/types.{Burn, InitPool, Mint, PoolAction, PoolDatum}
+use etrade/types.{EBuy, EDelist, EEdit, ETradeAction, ETradeDatum}
 
-// enegery trade validator
-validator tradecontract {
-  // spend of utxos with a fitting price
+// Energy Market Validator
+validator energymarket {
   spend(
-    _datum: Option<PoolDatum>,
-    redeemer action: PoolAction,
-    o_ref: OutputReference,
+    datum: Option<ETradeDatum>,
+    reedemer: ETradeAction,
+    oref: OutputReference,
     tx: Transaction,
   ) {
-    let Transaction { mint, inputs, outputs, .. } = tx
-    // check whether own UTxO is consumed and extract the policy ID
-    expect Some(Input {
-      output: Output {
-        address: this_address,
-        value: _pool_input_value,
-        datum: InlineDatum(input_datum),
-        ..
-      },
-      output_reference: _,
-    }) = list.find(inputs, fn(inp) { inp.output_reference == o_ref })
+    expect Some(d) = datum
 
-    // use full Datum record
-    expect EnergyDatum {
-      price,
-      energy_tokens: input_lp_tokens,
-      selleraddr: input_lend_out,
-    } = input_datum
+    when reedemer is {
+      // Buy e-tokens
+      EBuy -> {
+        // e token seller gets paid the listed amount
+        expect Some(payment) =
+          // find output to seller address
+          list.find(
+            tx.outputs,
+            fn(output) {
+              output.address.payment_credential == VerificationKey(d.seller)
+            },
+          )
 
-    when action is {
-      
+        // payment value is correct
+        assets.lovelace_of(payment.value) == d.price
+      }
+      EEdit { price } -> {
+        // just change the price
+        expect Some(ownInput) =
+          list.find(tx.inputs, fn(input) { input.output_reference == oref })
+
+        let ownHash = ownInput.output.address.payment_credential
+
+        // script Output has same Value as input
+        expect Some(ownOutput) =
+          list.find(
+            tx.outputs,
+            fn(output) {
+              output.address.payment_credential == ownHash && output.value == ownInput.output.value
+            },
+          )
+
+        // check output datum = new listing
+        expect InlineDatum(datum) = ownOutput.datum
+        expect newDatum: ETradeDatum = datum
+
+        // check newDatum Values && signature
+        and {
+          newDatum.seller == d.seller,
+          newDatum.price == price,
+          list.has(tx.extra_signatories, d.seller),
+        }
+      }
+      // just delist the tokens
+      EDelist -> list.has(tx.extra_signatories, d.seller)?
     }
   }
 
