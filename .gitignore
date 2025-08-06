@@ -27,3 +27,9 @@ dashboard/node_modules
 dashboard/dist
 dashboard/dist-ssr
 *.local
+
+*__pycache__
+
+*venv
+
+*calls.txt

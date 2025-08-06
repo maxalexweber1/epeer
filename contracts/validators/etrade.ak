@@ -6,7 +6,7 @@ use cardano/transaction.{
 }
 use etrade/types.{EBuy, EDelist, EEdit, ETradeAction, ETradeDatum}
 
-// Energy Market Validator
+// Energy Market Buy Validator
 validator energymarket {
   spend(
     datum: Option<ETradeDatum>,
@@ -17,7 +17,7 @@ validator energymarket {
     expect Some(d) = datum
 
     when reedemer is {
-      // Buy e-tokens
+      // buy e-tokens
       EBuy -> {
         // e token seller gets paid the listed amount
         expect Some(payment) =
@@ -28,7 +28,6 @@ validator energymarket {
               output.address.payment_credential == VerificationKey(d.seller)
             },
           )
-
         // payment value is correct
         assets.lovelace_of(payment.value) == d.price
       }
@@ -39,7 +38,7 @@ validator energymarket {
 
         let ownHash = ownInput.output.address.payment_credential
 
-        // script Output has same Value as input
+        // script output has same value as input
         expect Some(ownOutput) =
           list.find(
             tx.outputs,

@@ -15,8 +15,6 @@ services:
           condition: service_started
       cardanosigner_00:
           condition: service_started
-      dataexchange_00:
-          condition: service_started
       postgres:
           condition: service_healthy
     
@@ -96,19 +94,6 @@ services:
         interval: 5s
         timeout: 3s
         retries: 12
-
-  dataexchange_00:
-    container_name: dataexchange_00
-    image: ghcr.io/hyperledger/firefly-dataexchange-https@sha256:1e01b0d5fc3cfd95de150d47c09ba419b8ec98345d105a6d67d7bc7101aeea89
-    volumes:
-      - ./dataexchange_00:/data:ro
-    ports:
-      - 10205:3000
-    logging:
-      driver: json-file
-      options:
-        max-file: "1"
-        max-size: 10m
 
 volumes:
   connect-contracts:
