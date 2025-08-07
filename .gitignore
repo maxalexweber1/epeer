@@ -31,5 +31,5 @@ dashboard/dist-ssr
 *__pycache__
 
 *venv
-
+src/firefly-cardano
 *calls.txt

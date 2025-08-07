@@ -1,0 +1,21 @@
+[package]
+name = "epeer"
+version = "0.1.0"
+edition = "2024"
+repository = "https://github.com/hyperledger/firefly-cardano"
+
+[dependencies]
+firefly-balius = { path = "../../firefly-balius" }
+hex = "0.4.3"
+serde = { version = "1", features = ["derive"] }
+pallas-addresses = "1.0.0-alpha.2"
+pallas-primitives = "1.0.0-alpha.2"
+pallas-codec = "1.0.0-alpha.2"
+serde_cbor = "0.11"
+hex-literal = "0.4"
+pallas-txbuilder = "1.0.0-alpha.2"
+pallas-crypto = "1.0.0-alpha.2"
+anyhow = "1.0"
+once_cell = "1.18.0"
+[lib]
+crate-type = ["cdylib"]
